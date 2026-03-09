@@ -45,8 +45,8 @@
     }
 
     .logo {
-      width: 72px;
-      height: 72px;
+      width: 131px;
+      height: 201px;
     }
 
     /* ── Main content ── */
@@ -164,6 +164,116 @@
       color: var(--divider);
     }
 
+    /* ── Passcode Modal ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--divider);
+      padding: 40px 36px;
+      width: 100%;
+      max-width: 320px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .modal-title {
+      font-family: 'Inter', sans-serif;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gray);
+      text-align: center;
+    }
+
+    .pin-dots {
+      display: flex;
+      gap: 14px;
+    }
+
+    .pin-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 1px solid var(--gray);
+      background: transparent;
+      transition: background 0.15s ease;
+    }
+
+    .pin-dot.filled {
+      background: var(--white);
+      border-color: var(--white);
+    }
+
+    .pin-keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      width: 100%;
+    }
+
+    .pin-key {
+      background: transparent;
+      border: 1px solid var(--divider);
+      color: var(--white);
+      font-family: 'Inter', sans-serif;
+      font-size: 18px;
+      font-weight: 300;
+      padding: 16px 0;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease;
+      text-align: center;
+    }
+
+    .pin-key:hover {
+      background: var(--divider);
+    }
+
+    .pin-key.wide {
+      grid-column: span 2;
+    }
+
+    .modal-error {
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #c0392b;
+      min-height: 14px;
+      text-align: center;
+    }
+
+    .modal-cancel {
+      background: none;
+      border: none;
+      color: var(--gray);
+      font-family: 'Inter', sans-serif;
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: color 0.2s ease;
+    }
+
+    .modal-cancel:hover {
+      color: var(--white);
+    }
+
     /* ── Responsive ── */
     @media (max-width: 480px) {
       header {
@@ -210,8 +320,48 @@
           <span class="arrow">→</span>
         </a>
       </li>
+      <li>
+        <a class="app-link" href="https://bvtasker.vercel.app" target="_blank" rel="noopener">
+          <span class="app-name">Tasker</span>
+          <span class="arrow">→</span>
+        </a>
+      </li>
+      <li>
+        <a class="app-link" href="#" onclick="openPasscode(event)">
+          <span class="app-name">Quick Quote</span>
+          <span class="arrow">→</span>
+        </a>
+      </li>
     </ul>
   </main>
+
+  <!-- Passcode Modal -->
+  <div class="modal-overlay" id="passcodeModal">
+    <div class="modal">
+      <p class="modal-title">Enter Passcode</p>
+      <div class="pin-dots">
+        <div class="pin-dot" id="dot0"></div>
+        <div class="pin-dot" id="dot1"></div>
+        <div class="pin-dot" id="dot2"></div>
+        <div class="pin-dot" id="dot3"></div>
+      </div>
+      <p class="modal-error" id="modalError"></p>
+      <div class="pin-keypad">
+        <button class="pin-key" onclick="pressKey('1')">1</button>
+        <button class="pin-key" onclick="pressKey('2')">2</button>
+        <button class="pin-key" onclick="pressKey('3')">3</button>
+        <button class="pin-key" onclick="pressKey('4')">4</button>
+        <button class="pin-key" onclick="pressKey('5')">5</button>
+        <button class="pin-key" onclick="pressKey('6')">6</button>
+        <button class="pin-key" onclick="pressKey('7')">7</button>
+        <button class="pin-key" onclick="pressKey('8')">8</button>
+        <button class="pin-key" onclick="pressKey('9')">9</button>
+        <button class="pin-key" onclick="pressKey('del')">⌫</button>
+        <button class="pin-key" onclick="pressKey('0')">0</button>
+      </div>
+      <button class="modal-cancel" onclick="closePasscode()">Cancel</button>
+    </div>
+  </div>
 
   <footer>
     <div class="footer-links">
@@ -221,6 +371,68 @@
     </div>
     <p class="footer-copy">© 2026 Boovara</p>
   </footer>
+
+  <script>
+    const CORRECT = '8101';
+    let entry = '';
+
+    function openPasscode(e) {
+      e.preventDefault();
+      entry = '';
+      updateDots();
+      document.getElementById('modalError').textContent = '';
+      document.getElementById('passcodeModal').classList.add('active');
+    }
+
+    function closePasscode() {
+      entry = '';
+      updateDots();
+      document.getElementById('modalError').textContent = '';
+      document.getElementById('passcodeModal').classList.remove('active');
+    }
+
+    function pressKey(k) {
+      if (k === 'del') {
+        entry = entry.slice(0, -1);
+        updateDots();
+        return;
+      }
+      if (entry.length >= 4) return;
+      entry += k;
+      updateDots();
+      if (entry.length === 4) {
+        setTimeout(checkPasscode, 120);
+      }
+    }
+
+    function updateDots() {
+      for (let i = 0; i < 4; i++) {
+        document.getElementById('dot' + i).classList.toggle('filled', i < entry.length);
+      }
+    }
+
+    function checkPasscode() {
+      if (entry === CORRECT) {
+        closePasscode();
+        window.open('https://bvquickquote.vercel.app', '_blank');
+      } else {
+        document.getElementById('modalError').textContent = 'Incorrect passcode';
+        entry = '';
+        updateDots();
+      }
+    }
+
+    document.getElementById('passcodeModal').addEventListener('click', function(e) {
+      if (e.target === this) closePasscode();
+    });
+
+    document.addEventListener('keydown', function(e) {
+      if (!document.getElementById('passcodeModal').classList.contains('active')) return;
+      if (e.key >= '0' && e.key <= '9') pressKey(e.key);
+      if (e.key === 'Backspace') pressKey('del');
+      if (e.key === 'Escape') closePasscode();
+    });
+  </script>
 
 </body>
 </html>
