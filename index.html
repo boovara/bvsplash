@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BV Apps</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #0f0f0f;
+      --surface: #1a1a1a;
+      --white: #f0efed;
+      --gray: #666662;
+      --divider: #2a2a2a;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--white);
+      font-family: 'Inter', sans-serif;
+      font-weight: 300;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* ── Header / Logo ── */
+    header {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 56px 24px 40px;
+    }
+
+    .logo {
+      width: 72px;
+      height: 72px;
+    }
+
+    /* ── Main content ── */
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 0 24px 64px;
+    }
+
+    .eyebrow {
+      font-family: 'Inter', sans-serif;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gray);
+      margin-bottom: 48px;
+      text-align: center;
+    }
+
+    /* ── App links ── */
+    .app-list {
+      list-style: none;
+      width: 100%;
+      max-width: 380px;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .app-list li {
+      border-top: 1px solid var(--divider);
+    }
+
+    .app-list li:last-child {
+      border-bottom: 1px solid var(--divider);
+    }
+
+    .app-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      text-decoration: none;
+      color: var(--white);
+      padding: 22px 4px;
+      transition: color 0.2s ease;
+    }
+
+    .app-link:hover {
+      color: var(--gray);
+    }
+
+    .app-link:hover .arrow {
+      transform: translateX(4px);
+      opacity: 0.5;
+    }
+
+    .app-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 28px;
+      font-weight: 400;
+      letter-spacing: 0.02em;
+      line-height: 1;
+    }
+
+    .arrow {
+      font-size: 16px;
+      transition: transform 0.2s ease, opacity 0.2s ease;
+      opacity: 0.35;
+      flex-shrink: 0;
+    }
+
+    /* ── Footer ── */
+    footer {
+      padding: 24px 24px 36px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      border-top: 1px solid var(--divider);
+    }
+
+    .footer-links {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .footer-links a {
+      font-size: 10px;
+      font-weight: 400;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--gray);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .footer-links a:hover {
+      color: var(--white);
+    }
+
+    .footer-sep {
+      color: var(--divider);
+      font-size: 10px;
+    }
+
+    .footer-copy {
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--divider);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 480px) {
+      header {
+        padding: 40px 24px 28px;
+      }
+
+      .logo {
+        width: 60px;
+        height: 60px;
+      }
+
+      .app-name {
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <!-- BV Logo -->
+    <img class="logo" src="bv_wht.png" alt="BV Logo" />
+  </header>
+
+  <main>
+    <p class="eyebrow">Boovara Apps</p>
+
+    <ul class="app-list">
+      <li>
+        <a class="app-link" href="https://bvscheduler.vercel.app" target="_blank" rel="noopener">
+          <span class="app-name">Scheduler</span>
+          <span class="arrow">→</span>
+        </a>
+      </li>
+      <li>
+        <a class="app-link" href="https://bvboard.vercel.app" target="_blank" rel="noopener">
+          <span class="app-name">Board</span>
+          <span class="arrow">→</span>
+        </a>
+      </li>
+      <li>
+        <a class="app-link" href="https://bvpidviewer.vercel.app" target="_blank" rel="noopener">
+          <span class="app-name">Project Viewer</span>
+          <span class="arrow">→</span>
+        </a>
+      </li>
+    </ul>
+  </main>
+
+  <footer>
+    <div class="footer-links">
+      <a href="https://boovara.com" target="_blank" rel="noopener">Boovara</a>
+      <span class="footer-sep">·</span>
+      <a href="https://instagram.com/boovaradesigns" target="_blank" rel="noopener">Instagram</a>
+    </div>
+    <p class="footer-copy">© 2026 Boovara</p>
+  </footer>
+
+</body>
+</html>
