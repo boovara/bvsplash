@@ -162,6 +162,8 @@
       letter-spacing: 0.12em;
       text-transform: uppercase;
       color: var(--divider);
+      user-select: none;
+      cursor: default;
     }
 
     /* ── Passcode Modal ── */
@@ -303,7 +305,7 @@
 
     <ul class="app-list">
       <li>
-        <a class="app-link" href="https://bvscheduler.vercel.app" target="_blank" rel="noopener">
+        <a class="app-link" href="#" onclick="openScheduler(event)">
           <span class="app-name">Scheduler</span>
           <span class="arrow">→</span>
         </a>
@@ -335,7 +337,38 @@
     </ul>
   </main>
 
-  <!-- Passcode Modal -->
+  <!-- Lock confirmation banner -->
+  <div id="lockBanner" style="position:fixed;top:32px;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--divider);color:var(--gray);font-family:'Inter',sans-serif;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;padding:12px 28px;opacity:0;transition:opacity 0.3s ease;pointer-events:none;z-index:200;">🔒 Scheduler Locked</div>
+
+  <!-- Scheduler Passcode Modal -->
+  <div class="modal-overlay" id="schedulerModal">
+    <div class="modal">
+      <p class="modal-title">Enter Passcode</p>
+      <div class="pin-dots">
+        <div class="pin-dot" id="sdot0"></div>
+        <div class="pin-dot" id="sdot1"></div>
+        <div class="pin-dot" id="sdot2"></div>
+        <div class="pin-dot" id="sdot3"></div>
+      </div>
+      <p class="modal-error" id="schedulerError"></p>
+      <div class="pin-keypad">
+        <button class="pin-key" onclick="schedulerKey('1')">1</button>
+        <button class="pin-key" onclick="schedulerKey('2')">2</button>
+        <button class="pin-key" onclick="schedulerKey('3')">3</button>
+        <button class="pin-key" onclick="schedulerKey('4')">4</button>
+        <button class="pin-key" onclick="schedulerKey('5')">5</button>
+        <button class="pin-key" onclick="schedulerKey('6')">6</button>
+        <button class="pin-key" onclick="schedulerKey('7')">7</button>
+        <button class="pin-key" onclick="schedulerKey('8')">8</button>
+        <button class="pin-key" onclick="schedulerKey('9')">9</button>
+        <button class="pin-key" onclick="schedulerKey('del')">⌫</button>
+        <button class="pin-key" onclick="schedulerKey('0')">0</button>
+      </div>
+      <button class="modal-cancel" onclick="closeScheduler()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Quick Quote Passcode Modal -->
   <div class="modal-overlay" id="passcodeModal">
     <div class="modal">
       <p class="modal-title">Enter Passcode</p>
@@ -369,10 +402,91 @@
       <span class="footer-sep">·</span>
       <a href="https://instagram.com/boovaradesigns" target="_blank" rel="noopener">Instagram</a>
     </div>
-    <p class="footer-copy">© 2026 Boovara</p>
+    <p class="footer-copy" id="footerCopy">© 2026 Boovara</p>
   </footer>
 
   <script>
+    const STORAGE_KEY = 'bv_scheduler_unlocked';
+
+    // ── Scheduler modal ──────────────────────────────────────────
+    const SCHEDULER_CODES = ['8110', '8101'];
+    const SCHEDULER_URL   = 'https://bvscheduler.vercel.app';
+    let sEntry = '';
+
+    function openScheduler(e) {
+      e.preventDefault();
+      if (localStorage.getItem(STORAGE_KEY)) {
+        window.open(SCHEDULER_URL, '_blank');
+        return;
+      }
+      sEntry = '';
+      updateSchedulerDots();
+      document.getElementById('schedulerError').textContent = '';
+      document.getElementById('schedulerModal').classList.add('active');
+    }
+
+    function closeScheduler() {
+      sEntry = '';
+      updateSchedulerDots();
+      document.getElementById('schedulerError').textContent = '';
+      document.getElementById('schedulerModal').classList.remove('active');
+    }
+
+    function schedulerKey(k) {
+      if (k === 'del') { sEntry = sEntry.slice(0, -1); updateSchedulerDots(); return; }
+      if (sEntry.length >= 4) return;
+      sEntry += k;
+      updateSchedulerDots();
+      if (sEntry.length === 4) setTimeout(checkScheduler, 120);
+    }
+
+    function updateSchedulerDots() {
+      for (let i = 0; i < 4; i++) {
+        document.getElementById('sdot' + i).classList.toggle('filled', i < sEntry.length);
+      }
+    }
+
+    function checkScheduler() {
+      if (SCHEDULER_CODES.includes(sEntry)) {
+        localStorage.setItem(STORAGE_KEY, '1');
+        closeScheduler();
+        window.open(SCHEDULER_URL, '_blank');
+      } else {
+        document.getElementById('schedulerError').textContent = 'Incorrect passcode';
+        sEntry = '';
+        updateSchedulerDots();
+      }
+    }
+
+    document.getElementById('schedulerModal').addEventListener('click', function(e) {
+      if (e.target === this) closeScheduler();
+    });
+
+    // ── 3-second hold on footer to lock Scheduler ───────────────
+    let holdTimer;
+    const footerCopy = document.getElementById('footerCopy');
+
+    function triggerLock() {
+      localStorage.removeItem(STORAGE_KEY);
+      const banner = document.getElementById('lockBanner');
+      banner.style.opacity = '1';
+      setTimeout(() => { banner.style.opacity = '0'; }, 1500);
+    }
+
+    footerCopy.addEventListener('mousedown', function(e) {
+      e.preventDefault();
+      holdTimer = setTimeout(triggerLock, 3000);
+    });
+    footerCopy.addEventListener('touchstart', function(e) {
+      e.preventDefault();
+      holdTimer = setTimeout(triggerLock, 3000);
+    }, { passive: false });
+
+    ['mouseup', 'mouseleave', 'touchend', 'touchcancel'].forEach(ev => {
+      footerCopy.addEventListener(ev, () => clearTimeout(holdTimer));
+    });
+
+    // ── Quick Quote modal ────────────────────────────────────────
     const CORRECT = '8101';
     let entry = '';
 
@@ -392,17 +506,11 @@
     }
 
     function pressKey(k) {
-      if (k === 'del') {
-        entry = entry.slice(0, -1);
-        updateDots();
-        return;
-      }
+      if (k === 'del') { entry = entry.slice(0, -1); updateDots(); return; }
       if (entry.length >= 4) return;
       entry += k;
       updateDots();
-      if (entry.length === 4) {
-        setTimeout(checkPasscode, 120);
-      }
+      if (entry.length === 4) setTimeout(checkPasscode, 120);
     }
 
     function updateDots() {
@@ -426,11 +534,20 @@
       if (e.target === this) closePasscode();
     });
 
+    // ── Keyboard support ─────────────────────────────────────────
     document.addEventListener('keydown', function(e) {
-      if (!document.getElementById('passcodeModal').classList.contains('active')) return;
-      if (e.key >= '0' && e.key <= '9') pressKey(e.key);
-      if (e.key === 'Backspace') pressKey('del');
-      if (e.key === 'Escape') closePasscode();
+      const schedulerActive = document.getElementById('schedulerModal').classList.contains('active');
+      const passcodeActive  = document.getElementById('passcodeModal').classList.contains('active');
+
+      if (schedulerActive) {
+        if (e.key >= '0' && e.key <= '9') schedulerKey(e.key);
+        if (e.key === 'Backspace') schedulerKey('del');
+        if (e.key === 'Escape') closeScheduler();
+      } else if (passcodeActive) {
+        if (e.key >= '0' && e.key <= '9') pressKey(e.key);
+        if (e.key === 'Backspace') pressKey('del');
+        if (e.key === 'Escape') closePasscode();
+      }
     });
   </script>
 
